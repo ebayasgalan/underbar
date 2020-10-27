@@ -54,7 +54,6 @@
   // Note: _.each does not have a return value, but rather simply runs the
   // iterator function over each item in the input collection.
   _.each = function(collection, iterator) {
-    if (Array.isArray(collection)) { console.log('this one is array: ', collection); }
     if (!Array.isArray(collection)) {
       const entries = Object.entries(collection);
       for (let [key, value] of entries) {
@@ -83,6 +82,7 @@
         result = index;
       }
     });
+    array.each(_.each(arr));
 
     return result;
   };
