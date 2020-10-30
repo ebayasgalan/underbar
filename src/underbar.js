@@ -77,37 +77,76 @@
     // it uses the iteration helper `each`, which you will need to write.
     var result = -1;
 
-    _.each(array, function(item, index) {
-      if (item === target && result === -1) {
-        result = index;
-      }
-    });
-    array.each(_.each(arr));
-
+    for (let i = 0; i < array.length; i++) {
+      if (array[i] === target) { result = i; break; }
+    }
     return result;
   };
 
   // Return all elements of an array that pass a truth test.
   _.filter = function(collection, test) {
-
+    const result = [];
+    for (let i = 0; i < collection.length; i++) {
+      const currentValue = collection[i];
+      if (test(currentValue)) { result.push(currentValue); }
+    }
+    return result;
   };
 
   // Return all elements of an array that don't pass a truth test.
   _.reject = function(collection, test) {
+    const inputArr = [...collection];
+    const rejected = [];
     // TIP: see if you can re-use _.filter() here, without simply
     // copying code in and modifying it
+    for (let val of inputArr) {
+      if (!test(val)) { rejected.push(val); }
+    }
+    return rejected;
   };
 
   // Produce a duplicate-free version of the array.
   _.uniq = function(array, isSorted, iterator) {
+    const inputArr = [...array];
+    const set = new Set();
+    const uniqueValues = [];
+    const iteratorValue = [];
+    if ( isSorted ) {
+      for (let i = 0; i < inputArr.length; i++) {
+        // iterator result
+        const iteratorResult = iterator(inputArr[i]);
+        // if new data, store it internally
+        if (!iteratorValue.includes(iteratorResult)) {
+          iteratorValue.push(iteratorResult);
+          uniqueValues.push(inputArr[i]);
+        }
+      }
+    } else {
+      for (let i = 0; i < inputArr.length; i++) {
+        // if new data, store it internally
+        if (!iteratorValue.includes(inputArr[i])) {
+          iteratorValue.push(inputArr[i]);
+          uniqueValues.push(inputArr[i]);
+        }
+      }
+    }
+    return uniqueValues;
   };
 
-
-  // Return the results of applying an iterator to each element.
   _.map = function(collection, iterator) {
-    // map() is a useful primitive iteration function that works a lot
-    // like each(), but in addition to running the operation on all
-    // the members, it also maintains an array of results.
+    const endResult = [];
+    if (Array.isArray(collection)) {
+      for (let i = 0; i < collection.length; i++) {
+        const currentValue = collection[i];
+        endResult.push(iterator(currentValue));
+      }
+    } else {
+      const entries = Object.entries(collection);
+      for (let [key, val] of entries) {
+        endResult.push(iterator(val));
+      }
+    }
+    return endResult;
   };
 
   /*
@@ -149,6 +188,35 @@
   //   }); // should be 5, regardless of the iterator function passed in
   //          No accumulator is given so the first element is used.
   _.reduce = function(collection, iterator, accumulator) {
+    // create duplicate of input array
+    const inputArray = [...collection];
+    // create end result
+    let total = 0;
+    // create alias for memo
+    const memo = arguments[2];
+    // if no memo is passed and second item is passed in
+    if ( memo === undefined ) {
+      accumulator = inputArray[0];
+      for (let i = 1; i < inputArray.length; i++) {
+        total = iterator(accumulator, inputArray[i]);
+        // if iterator is undefined run it again
+        if ( total === undefined ) {
+          total = iterator(accumulator, inputArray[i]);
+        }
+        accumulator = total;
+      }
+    } else {
+      // if memo is passed and first item is passed in
+      for (let i = 0; i < inputArray.length; i++) {
+        total = iterator(accumulator, inputArray[i]);
+        // if iterator is undefined run it again
+        if ( total === undefined ) {
+          total = iterator(accumulator, inputArray[i]);
+        }
+        accumulator = total;
+      }
+    }
+    return total;
   };
 
 
