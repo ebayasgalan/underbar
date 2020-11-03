@@ -188,8 +188,15 @@
   //   }); // should be 5, regardless of the iterator function passed in
   //          No accumulator is given so the first element is used.
   _.reduce = function(collection, iterator, accumulator) {
-    // create duplicate of input array
-    const inputArray = [...collection];
+    let inputArray = [];
+    if ( collection.length === undefined ) {
+      const entries = Object.entries(collection);
+      for (let [key, val] of entries) {
+        inputArray.push(val);
+      }
+    } else {
+      inputArray = [...collection];
+    }
     // create end result
     let total = 0;
     // create alias for memo
@@ -252,13 +259,32 @@
 
   // Determine whether all of the elements match a truth test.
   _.every = function(collection, iterator) {
+    if (collection.length === 0) { return true; }
     // TIP: Try re-using reduce() here.
+    return _.reduce(collection, function (isTrue, item) {
+      if (iterator !== undefined) { item = iterator(item); }
+      if ( !!item === isTrue ) { return true; } else { return false; }
+    }, true);
   };
 
-  // Determine whether any of the elements pass a truth test. If no iterator is
-  // provided, provide a default one
   _.some = function(collection, iterator) {
-    // TIP: There's a very clever way to re-use every() here.
+    const isSome = false;
+    // create aliases for true or false values
+    const truthy = [];
+    const falsy = [];
+    if (collection.length === 0) { return false; }
+    // iterate over the collection
+    for (let i = 0; i < collection.length; i++) {
+      let currentValue = collection[i];
+      if (typeof iterator === 'function') { currentValue = iterator(currentValue); }
+      if (!!currentValue) { truthy.push(currentValue); } else { falsy.push(currentValue); }
+    }
+    if (truthy.length === 0) {
+      return false;
+    }
+    if (falsy.length >= 0) {
+      return true;
+    }
   };
 
 
@@ -280,12 +306,40 @@
   //   }, {
   //     bla: "even more stuff"
   //   }); // obj1 now contains key1, key2, key3 and bla
-  _.extend = function(obj) {
+  _.extend = function(obj, sourceOne, sourceTwo) {
+    return Object.assign(obj, sourceOne, sourceTwo);
   };
 
   // Like extend, but doesn't ever overwrite a key that already
   // exists in obj
-  _.defaults = function(obj) {
+  _.defaults = function(obj, sourceOne, sourceTwo, sourceThree) {
+    // match with source one and add to obj
+    const sourceOnekeys = Object.keys(sourceOne);
+    const sourceOnevalues = Object.values(sourceOne);
+    for (let i = 0; i < sourceOnekeys.length; i++) {
+      const isTrue = obj.hasOwnProperty(sourceOnekeys[i]);
+      if (!isTrue) { obj[sourceOnekeys[i]] = sourceOnevalues[i]; }
+    }
+
+    // source two
+    if (sourceThree !== undefined) {
+      const sourceTwokeys = Object.keys(sourceTwo);
+      const sourceTwovalues = Object.values(sourceTwo);
+      for (let i = 0; i < sourceTwokeys.length; i++) {
+        const isTrue = obj.hasOwnProperty(sourceTwokeys[i]);
+        if (!isTrue) { obj[sourceTwokeys[i]] = sourceTwovalues[i]; }
+      }
+    }
+    // source three
+    if (sourceThree !== undefined) {
+      const sourceThreekeys = Object.keys(sourceThree);
+      const sourceThreevalues = Object.values(sourceThree);
+      for (let i = 0; i < sourceThreekeys.length; i++) {
+        const isTrue = obj.hasOwnProperty(sourceThreekeys[i]);
+        if (!isTrue) { obj[sourceThreekeys[i]] = sourceThreevalues[i]; }
+      }
+    }
+    return obj;
   };
 
 
@@ -329,7 +383,22 @@
   // already computed the result for the given argument and return that value
   // instead if possible.
   _.memoize = function(func) {
+    var alreadyCalled = false;
+    var result;
+    return function(argOne, argTwo) {
+      if ( argTwo === undefined) {
+        if (!alreadyCalled) {
+          result = func.apply(this, arguments);
+          alreadyCalled = true;
+        }
+      } else {
+        return func(argOne, argTwo);
+      }
+      return result;
+    };
   };
+
+
 
   // Delays a function for the given number of milliseconds, and then calls
   // it with the arguments supplied.
@@ -337,7 +406,10 @@
   // The arguments for the original function are passed after the wait
   // parameter. For example _.delay(someFunction, 500, 'a', 'b') will
   // call someFunction('a', 'b') after 500ms
-  _.delay = function(func, wait) {
+  _.delay = function(func, wait, someInput) {
+    setTimeout(() => {
+      func(someInput);
+    }, wait);
   };
 
 
@@ -352,6 +424,18 @@
   // input array. For a tip on how to make a copy of an array, see:
   // http://mdn.io/Array.prototype.slice
   _.shuffle = function(array) {
+    const inputArr = [...array];
+    const length = inputArr.length;
+    // iterate over the elements
+    for (let i = 0; i < length; i++) {
+      // get random index with max being the length of array
+      const randomIndex = Math.floor(Math.random() * length);
+      // switch current value with random index
+      const currentValue = inputArr[i];
+      inputArr[i] = inputArr[randomIndex];
+      inputArr[randomIndex] = currentValue;
+    }
+    return inputArr;
   };
 
 
