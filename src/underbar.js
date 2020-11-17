@@ -54,6 +54,7 @@
   // Note: _.each does not have a return value, but rather simply runs the
   // iterator function over each item in the input collection.
   _.each = function(collection, iterator) {
+    // if not an array
     if (!Array.isArray(collection)) {
       const entries = Object.entries(collection);
       for (let [key, value] of entries) {
@@ -62,9 +63,7 @@
     } else {
       for (let i = 0; i < collection.length; i++) {
         const currentItem = collection[i];
-        for ( let j = 0; j < currentItem.length; j++) {
-          iterator(currentItem[j], i, collection);
-        }
+        iterator(currentItem, i, collection);
       }
     }
   };
@@ -72,61 +71,58 @@
   // Returns the index at which value can be found in the array, or -1 if value
   // is not present in the array.
   _.indexOf = function(array, target) {
-    // TIP: Here's an example of a function that needs to iterate, which we've
-    // implemented for you. Instead of using a standard `for` loop, though,
-    // it uses the iteration helper `each`, which you will need to write.
     var result = -1;
+    var found = false;
 
-    for (let i = 0; i < array.length; i++) {
-      if (array[i] === target) { result = i; break; }
-    }
+    _.each(array, (current, i) => {
+      if (!found) {
+        if (current === target) {
+          result = i;
+          found = true;
+        }
+      }
+    });
     return result;
   };
 
   // Return all elements of an array that pass a truth test.
   _.filter = function(collection, test) {
     const result = [];
-    for (let i = 0; i < collection.length; i++) {
-      const currentValue = collection[i];
-      if (test(currentValue)) { result.push(currentValue); }
-    }
+    _.each(collection, (current) => {
+      if (test(current)) {
+        result.push(current);
+      }
+    });
     return result;
   };
 
   // Return all elements of an array that don't pass a truth test.
   _.reject = function(collection, test) {
-    const inputArr = [...collection];
-    const rejected = [];
-    // TIP: see if you can re-use _.filter() here, without simply
-    // copying code in and modifying it
-    for (let val of inputArr) {
-      if (!test(val)) { rejected.push(val); }
-    }
-    return rejected;
+    return _.filter(collection, (current) => {
+      if (!test(current)) { return current; }
+    });
   };
 
   // Produce a duplicate-free version of the array.
   _.uniq = function(array, isSorted, iterator) {
-    const inputArr = [...array];
-    const set = new Set();
     const uniqueValues = [];
     const iteratorValue = [];
     if ( isSorted ) {
-      for (let i = 0; i < inputArr.length; i++) {
+      for (let i = 0; i < array.length; i++) {
         // iterator result
-        const iteratorResult = iterator(inputArr[i]);
+        const iteratorResult = iterator(array[i]);
         // if new data, store it internally
         if (!iteratorValue.includes(iteratorResult)) {
           iteratorValue.push(iteratorResult);
-          uniqueValues.push(inputArr[i]);
+          uniqueValues.push(array[i]);
         }
       }
     } else {
-      for (let i = 0; i < inputArr.length; i++) {
+      for (let i = 0; i < array.length; i++) {
         // if new data, store it internally
-        if (!iteratorValue.includes(inputArr[i])) {
-          iteratorValue.push(inputArr[i]);
-          uniqueValues.push(inputArr[i]);
+        if (!iteratorValue.includes(array[i])) {
+          iteratorValue.push(array[i]);
+          uniqueValues.push(array[i]);
         }
       }
     }
